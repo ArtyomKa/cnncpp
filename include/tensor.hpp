@@ -32,6 +32,11 @@ public:
     {
         return _data.data();
     }
+
+    int total() const
+    {
+        return dims[0] * dims[1] * dims[2];
+    }
 };
 } // namespace
 #endif // _CNN_CPP_TENSOR_HPP_
