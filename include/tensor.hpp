@@ -3,8 +3,8 @@
 
 #include <array>
 #include <cstddef>
+#include <iostream>
 #include <vector>
-
 namespace cnncpp {
 template <typename T>
 class Tensor {
@@ -17,11 +17,21 @@ public:
     constexpr Tensor(size_t rows, size_t cols, size_t depth)
         : dims { rows, cols, depth }
         , _data(rows * cols * depth) {};
-    constexpr Tensor(size_t rows, size_t cols, size_t depth, const std::vector<T> data))
-	: dims { rows, cols, depth }, _data(data) {
-	std::cout << "Copy Tensor" << "\n" 
+    constexpr Tensor(size_t rows, size_t cols, size_t depth, const std::vector<T>& data)
+        : dims { rows, cols, depth }
+        , _data(data)
+    {
+        if (rows * cols * depth != data.size()) {
+            throw std::length_error("input data is incompatible with supplied dimensions");
+        }
+        std::cout << "Copy Tensor"
+                  << "\n";
+    };
 
-        };
+    const T* data() const
+    {
+        return _data.data();
+    }
 };
 } // namespace
 #endif // _CNN_CPP_TENSOR_HPP_
