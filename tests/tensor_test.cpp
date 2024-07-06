@@ -1,4 +1,4 @@
-#include "tensor.hpp"
+#include "cnncpp/tensor.hpp"
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <stdexcept>

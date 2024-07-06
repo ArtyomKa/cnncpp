@@ -33,6 +33,11 @@ public:
         return _data.data();
     }
 
+    void set(size_t row, size_t col, size_t depth, T val)
+    {
+        _data[depth * dims[0] * dims[1] + row * dims[1] + col] = val;
+    }
+
     int total() const
     {
         return dims[0] * dims[1] * dims[2];

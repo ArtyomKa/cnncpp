@@ -1,5 +1,5 @@
 
-#include "ops.hpp"
+#include "cnncpp/ops.hpp"
 #include "gtest/gtest.h"
 
 TEST(KernelTest, CreationTest)

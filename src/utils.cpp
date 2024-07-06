@@ -1,5 +1,5 @@
-#include "utils.hpp"
-#include "tensor.hpp"
+#include "cnncpp/utils.hpp"
+#include "cnncpp/tensor.hpp"
 #include <algorithm>
 #include <memory>
 #include <opencv2/core/hal/interface.h>
