@@ -1,5 +1,5 @@
 
-#include "cnncpp/ops.hpp"
+#include "cnncpp/layers.hpp"
 #include "gtest/gtest.h"
 #include <vector>
 

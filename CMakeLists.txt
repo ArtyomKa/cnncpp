@@ -14,7 +14,7 @@ add_subdirectory(runner)
 #sources
 set(LIB_SRCS src/tensor.cpp 
 	     src/utils.cpp
-	     src/ops.cpp)
+	     src/layers.cpp)
 
 add_library(${LIB_TARGET} ${LIB_SRCS})
 target_include_directories(${LIB_TARGET} PUBLIC include ${OpenCV_INCLUDE_DIRS})

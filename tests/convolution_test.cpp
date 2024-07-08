@@ -1,4 +1,4 @@
-#include "cnncpp/ops.hpp"
+#include "cnncpp/layers.hpp"
 #include "gtest/gtest.h"
 #include <numeric>
 #include <vector>
@@ -34,7 +34,7 @@ TEST(ConvolutionTest, Simple2DConvolution)
     std::vector<float> kernel { -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
     cnncpp::Tensor<float> input(3, 3, 1, { 0.6, 1.0, 0.6, 1.0, 1.0, 1.0, 1.0, 0.9, 0.9 });
     cnncpp::convolution conv({ 3, 3, 1 }, 3, 1, 1, { -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 });
-    auto res2 = std::inner_product(kernel.begin(), kernel.end(), input.roi_iterator(0,0,0,3), 0.0);
+    auto res2 = std::inner_product(kernel.begin(), kernel.end(), input.roi_iterator(0, 0, 0, 3), 0.0);
     auto res = conv(input);
     ASSERT_EQ(res->dims[0], 1);
     ASSERT_EQ(res->dims[1], 1);
@@ -69,28 +69,15 @@ TEST(ConvolutionTest, 4x42DConvolutionInputDepth3)
 }
 TEST(ConvolutionTest, 4x42DConvolutionInputDepth3KernelDepth2)
 {
-    cnncpp::Tensor<float> input(4, 4, 3, {  //channel 0
-                                           0.6, 1.0, 0.6, 0.2,
-                                           1.0, 1.0, 1.0, 0.9, 
-                                           1.0, 0.9, 0.9, 1.0, 
-                                           1.0, 0.8, 0.3, 1.0, 
-                                           //channel 1
-                                           0.6, 1.0, 0.6, 0.2, 
-                                           1.0, 1.0, 1.0, 0.9, 
-                                           1.0, 0.9, 0.9, 1.0, 
-                                           1.0, 0.8, 0.3, 1.0,
-                                            //channel 2
-                                           0.6, 1.0, 0.6, 0.2,
-                                           1.0, 1.0, 1.0, 0.9, 
-                                           1.0, 0.9, 0.9, 1.0, 
-                                           1.0, 0.8, 0.3, 1.0 });
-    cnncpp::convolution conv({ 4, 4, 3 }, 3, 1, 2, { -1.0, -1.0, -1.0, 
-                                                      1.0, 1.0, 1.0, 
-                                                      0.0, 0.0, 0.0,
+    cnncpp::Tensor<float> input(4, 4, 3, { // channel 0
+                                             0.6, 1.0, 0.6, 0.2, 1.0, 1.0, 1.0, 0.9, 1.0, 0.9, 0.9, 1.0, 1.0, 0.8, 0.3, 1.0,
+                                             // channel 1
+                                             0.6, 1.0, 0.6, 0.2, 1.0, 1.0, 1.0, 0.9, 1.0, 0.9, 0.9, 1.0, 1.0, 0.8, 0.3, 1.0,
+                                             // channel 2
+                                             0.6, 1.0, 0.6, 0.2, 1.0, 1.0, 1.0, 0.9, 1.0, 0.9, 0.9, 1.0, 1.0, 0.8, 0.3, 1.0 });
+    cnncpp::convolution conv({ 4, 4, 3 }, 3, 1, 2, { -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
 
-                                                      0.0, 0.0, 0.0, 
-                                                      1.0, 1.0, 1.0, 
-                                                      -1.0, -1.0, -1.0 });
+                                                       0.0, 0.0, 0.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0 });
     auto res = conv(input);
     ASSERT_EQ(res->dims[0], 2);
     ASSERT_EQ(res->dims[1], 2);
@@ -99,16 +86,8 @@ TEST(ConvolutionTest, 4x42DConvolutionInputDepth3KernelDepth2)
     ASSERT_NEAR(res->data()[1], 1.1 * 3, EPSILON);
     ASSERT_NEAR(res->data()[2], -0.2 * 3, EPSILON);
     ASSERT_NEAR(res->data()[3], -0.1 * 3, EPSILON);
-    ASSERT_NEAR(res->data()[4], (0.6*0.0 + 1.0*0 + 0.6*0.0 + 
-                                 1.0*1.0 + 1.0*1 + 1.0*1 
-                                 - 1.0*1 - 1.0*0.9 - 1.*0.9)*3 , EPSILON);
-    ASSERT_NEAR(res->data()[5], (1*0 + 0.6*0 + 0.2*0 + 
-                                 1*1 + 1*1 +   0.9*1 + 
-                                 0.9*(-1)+0.9*(-1) + 1.0*(-1)) * 3, EPSILON);
-    ASSERT_NEAR(res->data()[6], (1.0*0 + 1.0*0 + 1.0*0 +
-                                 1.0*1 + 0.9*1 + 0.9*1 +
-                                 1.0*(-1) + 0.8*(-1) + 0.3*(-1) ) * 3, EPSILON);
-    ASSERT_NEAR(res->data()[7], (1.0*0 + 1.0*0 + 0.9*0 +
-                                 0.9*1 + 0.9*1 + 1.0*1 +
-                                 0.8*(-1) + 0.3*(-1) + 1.0*(-1))* 3, EPSILON);
+    ASSERT_NEAR(res->data()[4], (0.6 * 0.0 + 1.0 * 0 + 0.6 * 0.0 + 1.0 * 1.0 + 1.0 * 1 + 1.0 * 1 - 1.0 * 1 - 1.0 * 0.9 - 1. * 0.9) * 3, EPSILON);
+    ASSERT_NEAR(res->data()[5], (1 * 0 + 0.6 * 0 + 0.2 * 0 + 1 * 1 + 1 * 1 + 0.9 * 1 + 0.9 * (-1) + 0.9 * (-1) + 1.0 * (-1)) * 3, EPSILON);
+    ASSERT_NEAR(res->data()[6], (1.0 * 0 + 1.0 * 0 + 1.0 * 0 + 1.0 * 1 + 0.9 * 1 + 0.9 * 1 + 1.0 * (-1) + 0.8 * (-1) + 0.3 * (-1)) * 3, EPSILON);
+    ASSERT_NEAR(res->data()[7], (1.0 * 0 + 1.0 * 0 + 0.9 * 0 + 0.9 * 1 + 0.9 * 1 + 1.0 * 1 + 0.8 * (-1) + 0.3 * (-1) + 1.0 * (-1)) * 3, EPSILON);
 }

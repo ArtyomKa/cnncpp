@@ -1,4 +1,4 @@
-#include "cnncpp/ops.hpp"
+#include "cnncpp/layers.hpp"
 #include <array>
 #include <memory>
 #include <numeric>
