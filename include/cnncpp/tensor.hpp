@@ -9,6 +9,10 @@ namespace cnncpp {
 template <typename T>
 class Tensor {
 
+public:
+    struct iterator {
+    };
+
 private:
     std::vector<T> _data;
 
