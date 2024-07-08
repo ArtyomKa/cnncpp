@@ -41,16 +41,15 @@ const cnncpp::Tensor<float>* cnncpp::convolution::operator()(const Tensor<float>
             for (int col = 0; col < _output_tensor->dims[1]; col++) {
                 float channel_res = 0.0;
                 for (size_t channel = 0; channel < input.dims[2]; channel++) {
-                    float kernel_res = 0.0;
-                    for (int kernel_row = 0; kernel_row < kernel.rows; kernel_row++) {
-
-                        auto input_roi_row_start = row * input_cols + col * _stride + kernel_row * input_cols;
-                        std::vector<float> input_row(&input.data()[input_roi_row_start], &input.data()[input_roi_row_start] + kernel.cols);
-                        std::vector<float> kernel_row_data(&kernel.data[kernel_row * kernel.cols], &kernel.data[(kernel_row + 1) * kernel.cols]);
-
-                        channel_res += std::inner_product(input_row.begin(), input_row.end(), kernel_row_data.begin(), kernel_res);
-                    }
-                    channel_res += kernel_res;
+                    channel_res += std::inner_product(kernel.data.begin(), kernel.data.end(), input.roi_iterator(row, col, channel, kernel.rows), 0.0f);
+                    // for (int kernel_row = 0; kernel_row < kernel.rows; kernel_row++) {
+                    //
+                    //     auto input_roi_row_start = row * input_cols + col * _stride + kernel_row * input_cols;
+                    //     std::vector<float> input_row(&input.data()[input_roi_row_start], &input.data()[input_roi_row_start] + kernel.cols);
+                    //     std::vector<float> kernel_row_data(&kernel.data[kernel_row * kernel.cols], &kernel.data[(kernel_row + 1) * kernel.cols]);
+                    //
+                    //     channel_res += std::inner_product(input_row.begin(), input_row.end(), kernel_row_data.begin(), kernel_res);
+                    // }
                 }
                 _output_tensor->set(row, col, kernel_depth, channel_res);
             }
