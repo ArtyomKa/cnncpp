@@ -3,14 +3,82 @@
 
 #include <array>
 #include <cstddef>
+#include <exception>
 #include <iostream>
+#include <iterator>
 #include <vector>
 namespace cnncpp {
 template <typename T>
 class Tensor {
 
-public:
-    struct iterator {
+    class iterator {
+    public:
+        using value_type = T;
+        using difference_type = std::ptrdiff_t;
+        using pointer = T*;
+        using reference = T&;
+        using iterator_category = std::input_iterator_tag;
+
+    private:
+        std::vector<T>::const_iterator _current;
+        const size_t _rows { 0 };
+        const size_t _cols { 0 };
+        const size_t _depth { 0 };
+        const size_t _roi_size { 0 };
+        size_t _current_row { 0 };
+        size_t _current_col { 0 };
+        bool _end { false };
+
+    public:
+        iterator()
+            : _end(true) {
+            };
+        iterator(const Tensor<T>& tensor, int row, int col, int channel, int roi_size)
+            : _rows(tensor.dims[0])
+            , _cols(tensor.dims[1])
+            , _depth(tensor.dims[2])
+            , _roi_size(roi_size)
+            , _current_row(0)
+            , _current_col(0)
+
+        {
+            _current = (tensor._data.begin() + channel * _rows * _cols + row * _cols + col);
+        }
+        iterator operator++() noexcept
+        {
+            if (_end) {
+                return *this;
+            }
+            if (_current_row + 1 == _roi_size && _current_col + 1 == _roi_size) {
+                _end = true;
+                return *this;
+            }
+            if (_current_col + 1 < _roi_size) {
+                _current_col++;
+                _current++;
+                return *this;
+            }
+            if (_current_col + 1 == _roi_size && _current_row + 1 < _roi_size) {
+                _current_col = 0;
+                _current_row++;
+                _current += (_cols - _roi_size + 1);
+                return *this;
+            }
+            std::cout << "Error";
+
+            return *this;
+        }
+        T operator*() const { return *_current; };
+        friend bool operator==(const iterator& lhs, const iterator& rhs)
+        {
+            if (lhs._end && rhs._end)
+                return true;
+            return lhs._current == rhs._current;
+        }
+        friend bool operator!=(const iterator& lhs, const iterator& rhs)
+        {
+            return !(lhs == rhs);
+        }
     };
 
 private:
@@ -28,8 +96,6 @@ public:
         if (rows * cols * depth != data.size()) {
             throw std::length_error("input data is incompatible with supplied dimensions");
         }
-        std::cout << "Copy Tensor"
-                  << "\n";
     };
 
     const T* data() const
@@ -45,6 +111,14 @@ public:
     int total() const
     {
         return dims[0] * dims[1] * dims[2];
+    }
+    iterator roi_iterator(int row, int col, int depth, int roi_size) const
+    {
+        return iterator(*this, row, col, depth, roi_size);
+    }
+    iterator roi_end() const
+    {
+        return iterator();
     }
 };
 } // namespace
