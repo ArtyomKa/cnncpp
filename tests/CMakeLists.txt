@@ -10,6 +10,7 @@ add_executable(cnncpp_test tensor_test.cpp
 			   kernel_test.cpp 
 			   convolution_test.cpp 
 			   utils_test.cpp
+			   fully_connected_test.cpp
                            pooling_test.cpp)
 
 target_link_libraries(cnncpp_test cnncpp)

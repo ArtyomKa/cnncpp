@@ -2,6 +2,7 @@
 #define _CNN_CPP_TENSOR_HPP_
 
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <exception>
 #include <iostream>
@@ -115,6 +116,8 @@ public:
 
     void set(size_t row, size_t col, size_t depth, T val)
     {
+        auto index = depth * dims[0] * dims[1] + row * dims[1] + col;
+        assert(index < _data.size());
         _data[depth * dims[0] * dims[1] + row * dims[1] + col] = val;
     }
 
@@ -131,6 +134,10 @@ public:
         return iterator();
     }
 };
+
+typedef Tensor<float> TensorF;
+
 static_assert(std::forward_iterator<cnncpp::Tensor<float>::iterator>);
+
 } // namespace
 #endif // _CNN_CPP_TENSOR_HPP_

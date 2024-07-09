@@ -61,5 +61,15 @@ public:
     avg_pool(const std::array<int, 3>& input_shape, size_t kernel_size, size_t stride);
     virtual const Tensor<float>* operator()(const Tensor<float>& input) const override;
 };
+
+class fully_connected : public layer {
+private:
+    std::vector<float> _weights;
+    std::vector<float> _bias;
+
+public:
+    fully_connected(size_t input_size, size_t output_size, const std::vector<float>& weights, const std::vector<float>& bias);
+    virtual const Tensor<float>* operator()(const Tensor<float>& input) const override;
+};
 }
 #endif
