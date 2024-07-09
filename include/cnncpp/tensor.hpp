@@ -11,23 +11,24 @@ namespace cnncpp {
 template <typename T>
 class Tensor {
 
+public:
     class iterator {
     public:
         using value_type = T;
         using difference_type = std::ptrdiff_t;
         using pointer = T*;
         using reference = T&;
-        using iterator_category = std::input_iterator_tag;
+        using iterator_category = std::forward_iterator_tag;
 
     private:
         std::vector<T>::const_iterator _current;
-        const size_t _rows { 0 };
-        const size_t _cols { 0 };
-        const size_t _depth { 0 };
-        const size_t _roi_size { 0 };
+        size_t _rows { 0 };
+        size_t _cols { 0 };
+        size_t _depth { 0 };
+        size_t _roi_size { 0 };
         size_t _current_row { 0 };
         size_t _current_col { 0 };
-        bool _end { false };
+        bool _end { true };
 
     public:
         iterator()
@@ -40,11 +41,12 @@ class Tensor {
             , _roi_size(roi_size)
             , _current_row(0)
             , _current_col(0)
+            , _end(false)
 
         {
             _current = (tensor._data.begin() + channel * _rows * _cols + row * _cols + col);
         }
-        iterator operator++() noexcept
+        iterator& operator++() noexcept
         {
             if (_end) {
                 return *this;
@@ -68,7 +70,15 @@ class Tensor {
 
             return *this;
         }
-        T operator*() const { return *_current; };
+        iterator operator++(int)
+        {
+            iterator temp = *this;
+            ++_current;
+            return temp;
+        }
+        // iterator& operator=(const iterator& other) = default;
+        value_type operator*() const { return *_current; };
+        pointer operator->() const { return _current; }
         friend bool operator==(const iterator& lhs, const iterator& rhs)
         {
             if (lhs._end && rhs._end)
@@ -121,5 +131,6 @@ public:
         return iterator();
     }
 };
+static_assert(std::forward_iterator<cnncpp::Tensor<float>::iterator>);
 } // namespace
 #endif // _CNN_CPP_TENSOR_HPP_

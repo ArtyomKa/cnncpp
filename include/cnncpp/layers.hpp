@@ -2,6 +2,7 @@
 #define _CNN_CPP_OPS_HPP_
 #include "tensor.hpp"
 #include <array>
+#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <vector>
@@ -21,25 +22,44 @@ struct kernel {
         , data(data) {};
 };
 
-class ops {
+class layer {
+
+protected:
+    std::unique_ptr<Tensor<float>> _output_tensor;
 
 public:
     virtual const Tensor<float>* operator()(const Tensor<float>& input) const = 0;
-    virtual const Tensor<float>* output() const = 0;
+    const Tensor<float>* output() const;
 };
 
-class convolution : public ops {
+class convolution : public layer {
 private:
     std::vector<kernel> _kernels;
     const size_t _stride;
-    std::unique_ptr<Tensor<float>> _output_tensor;
 
 public:
     convolution(const std::array<int, 3>& input_shape, size_t kernel_size, size_t stride, size_t kernel_depth);
     convolution(const std::array<int, 3>& input_shape, size_t kernel_size, size_t stride, size_t kernel_depth, const std::vector<float>& kernel_data);
     virtual const Tensor<float>* operator()(const Tensor<float>& input) const override;
-    virtual const Tensor<float>* output() const override;
 };
 
+class max_pool : public layer {
+private:
+    const size_t _stride;
+    const size_t _kernel_size;
+
+public:
+    max_pool(const std::array<int, 3>& input_shape, size_t kernel_size, size_t stride);
+    virtual const Tensor<float>* operator()(const Tensor<float>& input) const override;
+};
+class avg_pool : public layer {
+private:
+    const size_t _stride;
+    const size_t _kernel_size;
+
+public:
+    avg_pool(const std::array<int, 3>& input_shape, size_t kernel_size, size_t stride);
+    virtual const Tensor<float>* operator()(const Tensor<float>& input) const override;
+};
 }
 #endif
