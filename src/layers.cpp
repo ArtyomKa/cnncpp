@@ -123,7 +123,8 @@ cnncpp::fully_connected::fully_connected(size_t input_size, size_t output_size,
 const cnncpp::Tensor<float>* cnncpp::fully_connected::operator()(const Tensor<float>& input) const
 {
     for (int i = 0; i < _output_tensor->dims[0]; i++) {
-        float val = std::inner_product(&input.data()[0], &(input.data()[0]) + input.dims[0], _weights.begin() + i * input.dims[0], 0.0f);
+        std::vector<float> weights_row(_weights.begin() + i * input.dims[0], _weights.begin() + (i + 1) * input.dims[0]);
+        float val = std::inner_product(weights_row.begin(), weights_row.end(), &input.data()[0], 0.0f);
         val = _activation(val + _bias[i]);
         _output_tensor->set(i, 0, 0, val);
     }
@@ -140,6 +141,16 @@ cnncpp::flatten::flatten(const std::array<int, 3>& input_shape)
 }
 const cnncpp::Tensor<float>* cnncpp::flatten::operator()(const Tensor<float>& input) const
 {
+
     input.copyto(*_output_tensor.get());
+
+    for (int row = 0; row < input.dims[0]; row++) {
+        for (int col = 0; col < input.dims[1]; col++) {
+            for (int channel = 0; channel < input.dims[2]; channel++) {
+                float val = *input.roi_iterator(row, col, channel, 1);
+                _output_tensor->set(channel + col * input.dims[2] + row * input.dims[2] * input.dims[1], 0, 0, val);
+            }
+        }
+    }
     return _output_tensor.get();
 }
