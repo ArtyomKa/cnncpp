@@ -1,3 +1,4 @@
+#include "cnncpp/activations.hpp"
 #include "cnncpp/layers.hpp"
 #include "tests.hpp"
 #include <gtest/gtest.h>

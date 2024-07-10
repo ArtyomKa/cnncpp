@@ -4,11 +4,11 @@ Reference implementation of a CNN in cpp
 
 ## Tasks
 
-- [ ] Layers:
-    * [ ]  Convolution 2D
+- [x] Layers:
+    * [x]  Convolution 2D
         - [x] Implement Convolutions
         - [x] Support for stride > 1
-        - [ ] Add activation and bias
+        - [x] Add activation and bias
     * [ ] Flatten
     * [x] - Avg Pooling
     * [x] - Max Pooling

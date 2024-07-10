@@ -121,6 +121,12 @@ public:
         _data[depth * dims[0] * dims[1] + row * dims[1] + col] = val;
     }
 
+    void copyto(Tensor<T>& out) const
+    {
+        assert(_data.size() == out._data.size());
+        std::copy(_data.cbegin(), _data.cend(), out._data.begin());
+    }
+
     int total() const
     {
         return dims[0] * dims[1] * dims[2];
