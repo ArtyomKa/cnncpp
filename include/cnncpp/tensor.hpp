@@ -1,6 +1,7 @@
 #ifndef _CNN_CPP_TENSOR_HPP_
 #define _CNN_CPP_TENSOR_HPP_
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -104,16 +105,23 @@ public:
         : dims { rows, cols, depth }
         , _data(data)
     {
-        if (rows * cols * depth != data.size()) {
+        if (rows * cols * depth != _data.size()) {
             throw std::length_error("input data is incompatible with supplied dimensions");
         }
     };
 
+    constexpr Tensor(size_t rows, size_t cols, size_t depth, std::vector<T>&& data)
+        : dims { rows, cols, depth }
+    {
+        if (rows * cols * depth != data.size()) {
+            throw std::length_error("input data is incompatible with supplied dimensions");
+        }
+        _data = std::move(data);
+    };
     const T* data() const
     {
         return _data.data();
     }
-
     void set(size_t row, size_t col, size_t depth, T val)
     {
         auto index = depth * dims[0] * dims[1] + row * dims[1] + col;

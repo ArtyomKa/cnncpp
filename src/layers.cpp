@@ -15,7 +15,6 @@ cnncpp::convolution::convolution(const std::array<int, 3>& input_shape,
     const std::vector<float>& bias)
     : _stride(stride)
     , _activation(activation)
-
     , _bias(bias)
 {
     std::vector<float>::const_iterator kernel_data_iterator = kernel_data.cbegin();
