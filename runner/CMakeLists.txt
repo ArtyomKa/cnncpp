@@ -1,7 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(TARGET cnncpp_run)
-add_subdirectory(HighFive)
+
+set(HIGHFIVE_USE_BOOST 0)
+include(FetchContent)
+FetchContent_Declare(
+	HighFive
+    GIT_REPOSITORY https://github.com/BlueBrain/HighFive.git
+    GIT_TAG v2.9.0
+)
+
+FetchContent_MakeAvailable(HighFive)
+
 add_executable(${TARGET} main.cpp)
 add_executable(hd5test test_keras_hd5.cpp)
 

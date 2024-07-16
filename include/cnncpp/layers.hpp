@@ -42,9 +42,11 @@ public:
 
 class convolution : public layer {
 private:
-    std::vector<kernel> _kernels;
+    std::vector<std::vector<float>> _kernels;
     std::vector<float> _bias;
     const size_t _stride;
+    const size_t _kernel_size;
+    const size_t _filters;
     activations::activation_func_ptr _activation;
 
 public:

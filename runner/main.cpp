@@ -10,9 +10,9 @@
 
 int main(int argc, const char* argv[])
 {
-    auto image = cv::imread("/home/artyom/devel/sandbox/cnncpp/data/testSample/img_3.jpg", cv::IMREAD_GRAYSCALE);
+    auto image = cv::imread("/home/artyom/devel/sandbox/cnncpp/data/testSample/img_10.jpg", cv::IMREAD_GRAYSCALE);
     cv::resize(image, image, cv::Size(32, 32));
-    std::string model_file_name = "/home/artyom/devel/sandbox/cnncpp/data/model/test.hd5";
+    std::string model_file_name = "/home/artyom/devel/sandbox/cnncpp/data/model/test2.hd5";
     std::cout << "image dims " << image.cols << "x" << image.rows << "x" << image.channels() << "\n";
     cv::Mat float_mat;
     image.convertTo(float_mat, CV_32F);

@@ -22,6 +22,7 @@ int main(int argc, const char* argv[])
         total_size *= dim;
     }
     std::vector<float> data(total_size);
-    v0.read_raw<float>(data.data());
+    v0.read(data.data());
+
     std::cout << "Done\n";
 }

@@ -28,44 +28,59 @@ public:
         size_t _cols { 0 };
         size_t _depth { 0 };
         size_t _roi_size { 0 };
+        size_t _roi_row { 0 };
+        size_t _roi_col { 0 };
         size_t _current_row { 0 };
         size_t _current_col { 0 };
+        size_t _current_depth { 0 };
         bool _end { true };
 
     public:
         iterator()
             : _end(true) {
             };
-        iterator(const Tensor<T>& tensor, int row, int col, int channel, int roi_size)
+        iterator(const Tensor<T>& tensor, int row, int col, int roi_size)
             : _rows(tensor.dims[0])
             , _cols(tensor.dims[1])
             , _depth(tensor.dims[2])
             , _roi_size(roi_size)
+            , _roi_row(row)
+            , _roi_col(col)
             , _current_row(0)
             , _current_col(0)
             , _end(false)
 
         {
-            _current = (tensor._data.begin() + channel * _rows * _cols + row * _cols + col);
+            _current = (tensor._data.begin() + row * _cols * _depth + col * _depth);
         }
         iterator& operator++() noexcept
         {
             if (_end) {
                 return *this;
             }
-            if (_current_row + 1 == _roi_size && _current_col + 1 == _roi_size) {
-                _end = true;
+            // if (_current_row + 1 == _roi_size && _current_col + 1 == _roi_size) {
+            if (_current_depth + 1 < _depth) {
+                _current_depth++;
+                ++_current;
+                // _end = true;
                 return *this;
+            } else {
+                _current_depth = 0;
             }
             if (_current_col + 1 < _roi_size) {
+                // if (_current_col + 1 < _roi_size) {
                 _current_col++;
-                _current++;
+                ++_current;
                 return *this;
-            }
-            if (_current_col + 1 == _roi_size && _current_row + 1 < _roi_size) {
+            } else {
                 _current_col = 0;
+            }
+            if (_current_row + 1 < _roi_size) {
                 _current_row++;
-                _current += (_cols - _roi_size + 1);
+                _current += ((_cols - _roi_size) * _depth + 1);
+                return *this;
+            } else {
+                _end = true;
                 return *this;
             }
             std::cout << "Error";
@@ -88,6 +103,92 @@ public:
             return lhs._current == rhs._current;
         }
         friend bool operator!=(const iterator& lhs, const iterator& rhs)
+        {
+            return !(lhs == rhs);
+        }
+    };
+
+    class iterator2d {
+    public:
+        using value_type = T;
+        using difference_type = std::ptrdiff_t;
+        using pointer = T*;
+        using reference = T&;
+        using iterator_category = std::forward_iterator_tag;
+
+    private:
+        std::vector<T>::const_iterator _current;
+        size_t _rows { 0 };
+        size_t _cols { 0 };
+        size_t _depth { 0 };
+        size_t _roi_size { 0 };
+        size_t _roi_row { 0 };
+        size_t _roi_col { 0 };
+        size_t _current_row { 0 };
+        size_t _current_col { 0 };
+        size_t _current_depth { 0 };
+        bool _end { true };
+
+    public:
+        iterator2d()
+            : _end(true) {
+            };
+        iterator2d(const Tensor<T>& tensor, int row, int col, int channel, int roi_size)
+            : _rows(tensor.dims[0])
+            , _cols(tensor.dims[1])
+            , _depth(tensor.dims[2])
+            , _roi_size(roi_size)
+            , _roi_row(row)
+            , _roi_col(col)
+            , _current_row(0)
+            , _current_col(0)
+            , _end(false)
+
+        {
+            _current = (tensor._data.begin() + row * _cols * _depth + col * _depth + channel);
+        }
+        iterator2d& operator++() noexcept
+        {
+            if (_end) {
+                return *this;
+            }
+            // if (_current_row + 1 == _roi_size && _current_col + 1 == _roi_size) {
+            if (_current_col + 1 < _roi_size) {
+                // if (_current_col + 1 < _roi_size) {
+                _current_col++;
+                _current += _depth;
+                return *this;
+            } else {
+                _current_col = 0;
+            }
+            if (_current_row + 1 < _roi_size) {
+                _current_row++;
+                _current += ((_cols - _roi_size + 1) * _depth);
+                return *this;
+            } else {
+                _end = true;
+                return *this;
+            }
+            std::cout << "Error";
+
+            return *this;
+        }
+        iterator2d operator++(int)
+        {
+            iterator2d temp = *this;
+            ++_current;
+            return temp;
+        }
+        // iterator& operator=(const iterator& other) = default;
+        value_type operator*() const { return *_current; };
+        pointer operator->() const { return _current; }
+        friend bool operator==(const iterator2d& lhs, const iterator2d& rhs)
+        {
+            if (lhs._end && rhs._end)
+                return true;
+            return lhs._current == rhs._current;
+        }
+        friend bool operator!=(const iterator2d& lhs, const iterator2d& rhs)
         {
             return !(lhs == rhs);
         }
@@ -124,9 +225,9 @@ public:
     }
     void set(size_t row, size_t col, size_t depth, T val)
     {
-        auto index = depth * dims[0] * dims[1] + row * dims[1] + col;
+        auto index = depth + col * dims[2] + row * dims[1] * dims[2];
         assert(index < _data.size());
-        _data[depth * dims[0] * dims[1] + row * dims[1] + col] = val;
+        _data[index] = val;
     }
 
     void copyto(Tensor<T>& out) const
@@ -139,13 +240,21 @@ public:
     {
         return dims[0] * dims[1] * dims[2];
     }
-    iterator roi_iterator(int row, int col, int depth, int roi_size) const
+    iterator roi_iterator(int row, int col, int roi_size) const
     {
-        return iterator(*this, row, col, depth, roi_size);
+        return iterator(*this, row, col, roi_size);
     }
     iterator roi_end() const
     {
         return iterator();
+    }
+    iterator2d roi2d_iterator(int row, int col, int depth, int roi_size) const
+    {
+        return iterator2d(*this, row, col, depth, roi_size);
+    }
+    iterator2d roi2d_end() const
+    {
+        return iterator2d();
     }
 };
 
