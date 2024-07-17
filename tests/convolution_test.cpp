@@ -1,7 +1,7 @@
-#include "cnncpp/layers.hpp"
+#include "cnncpp/layers/convolution.hpp"
 #include "gtest/gtest.h"
 #include <numeric>
-#include <vector>
+
 static constexpr float EPSILON = 1e-5;
 TEST(ConvolutionTest, VectorConvolution)
 {

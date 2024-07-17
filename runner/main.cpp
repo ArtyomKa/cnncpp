@@ -1,8 +1,10 @@
 #include "cnncpp/activations.hpp"
-#include "cnncpp/layers.hpp"
+#include "cnncpp/layers/convolution.hpp"
+#include "cnncpp/layers/layers.hpp"
+#include "cnncpp/layers/pooling.hpp"
 #include "cnncpp/utils.hpp"
-#include "highfive/H5File.hpp"
 #include <algorithm>
+#include <highfive/H5File.hpp>
 #include <highfive/highfive.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/core/hal/interface.h>

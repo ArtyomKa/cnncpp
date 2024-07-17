@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "cnncpp/layers.hpp"
+#include "cnncpp/layers/pooling.hpp"
 #include "tests.hpp"
 TEST(MaxPooling, OutputDims)
 {
