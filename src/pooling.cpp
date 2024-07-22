@@ -16,7 +16,7 @@ cnncpp::max_pool::max_pool(const std::array<int, 3>& input_shape, size_t kernel_
     _output_tensor = std::make_unique<Tensor<float>>(outd0, outd1, input_shape[2]);
 }
 
-const cnncpp::Tensor<float>& cnncpp::max_pool::operator()(const Tensor<float>& input) const
+const cnncpp::Tensor<float>* cnncpp::max_pool::operator()(const Tensor<float>& input) const
 {
     for (size_t depth = 0; depth < input.dims[2]; depth++) {
         for (int col = 0; col < input.dims[1] - _kernel_size + 1; col += _stride) {
@@ -26,7 +26,7 @@ const cnncpp::Tensor<float>& cnncpp::max_pool::operator()(const Tensor<float>& i
             }
         }
     }
-    return *_output_tensor.get();
+    return _output_tensor.get();
 }
 /*********************************************************************************
  * max_pooling
@@ -40,7 +40,7 @@ cnncpp::avg_pool::avg_pool(const std::array<int, 3>& input_shape, size_t kernel_
     _output_tensor = std::make_unique<Tensor<float>>(outd0, outd1, input_shape[2]);
 }
 
-const cnncpp::Tensor<float>& cnncpp::avg_pool::operator()(const Tensor<float>& input) const
+const cnncpp::Tensor<float>* cnncpp::avg_pool::operator()(const Tensor<float>& input) const
 {
     for (size_t depth = 0; depth < input.dims[2]; depth++) {
         for (int col = 0; col < input.dims[1] - _kernel_size + 1; col += _stride) {
@@ -50,5 +50,5 @@ const cnncpp::Tensor<float>& cnncpp::avg_pool::operator()(const Tensor<float>& i
             }
         }
     }
-    return *_output_tensor.get();
+    return _output_tensor.get();
 }

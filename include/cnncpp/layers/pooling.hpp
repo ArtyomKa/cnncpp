@@ -12,7 +12,7 @@ private:
 
 public:
     max_pool(const std::array<int, 3>& input_shape, size_t kernel_size, size_t stride);
-    virtual const Tensor<float>& operator()(const Tensor<float>& input) const override;
+    virtual const Tensor<float>* operator()(const Tensor<float>& input) const override;
 };
 
 class avg_pool : public layer {
@@ -22,7 +22,7 @@ private:
 
 public:
     avg_pool(const std::array<int, 3>& input_shape, size_t kernel_size, size_t stride);
-    virtual const Tensor<float>& operator()(const Tensor<float>& input) const override;
+    virtual const Tensor<float>* operator()(const Tensor<float>& input) const override;
 };
 }
 #endif

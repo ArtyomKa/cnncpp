@@ -36,7 +36,7 @@ cnncpp::convolution::convolution(const std::array<int, 3>& input_shape, size_t k
 {
 }
 
-const cnncpp::Tensor<float>& cnncpp::convolution::operator()(const Tensor<float>& input) const
+const cnncpp::Tensor<float>* cnncpp::convolution::operator()(const Tensor<float>& input) const
 {
     const size_t kernel_depth = input.dims[2];
     const size_t total_kernel_size = _kernel_size * _kernel_size * kernel_depth;
@@ -50,5 +50,5 @@ const cnncpp::Tensor<float>& cnncpp::convolution::operator()(const Tensor<float>
             }
         }
     }
-    return *_output_tensor.get();
+    return _output_tensor.get();
 }

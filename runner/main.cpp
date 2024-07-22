@@ -68,14 +68,14 @@ int main(int argc, const char* argv[])
 
     auto softmax = cnncpp::activations::softmax;
     auto output1 = conv2d_1(*tensor);
-    auto output2 = avg_pool(output1);
-    auto output3 = conv2d_2(output2);
-    auto output4 = avg_pool_2(output3);
-    auto output5 = flatten(output4);
-    auto output6 = fc1(output5);
-    auto output7 = fc2(output6);
-    auto output8 = fc3(output7);
-    auto res = softmax(std::vector<float>(&output8.data()[0], &output8.data()[0] + output8.total()));
+    auto output2 = avg_pool(*output1);
+    auto output3 = conv2d_2(*output2);
+    auto output4 = avg_pool_2(*output3);
+    auto output5 = flatten(*output4);
+    auto output6 = fc1(*output5);
+    auto output7 = fc2(*output6);
+    auto output8 = fc3(*output7);
+    auto res = softmax(std::vector<float>(&output8->data()[0], &output8->data()[0] + output8->total()));
 
     std::cout << "Digit: " << std::max_element(res.begin(), res.end()) - res.begin() << std::endl;
     return 0;

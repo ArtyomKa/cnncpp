@@ -3,15 +3,28 @@
 #include <gtest/gtest.h>
 #include <vector>
 
+
+TEST(FullyConneected, OuputCreatedTransposition)
+{
+    cnncpp::fully_connected fc_layer(4, 3, cnncpp::activations::none,
+        {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0, 9.0, 10.0, 11, 12}, {0.0, 0.0, 0.0});
+    const auto &output = fc_layer.output();
+    ASSERT_EQ(output.dims[0], 3);
+    ASSERT_EQ(output.dims[1], 1);
+    ASSERT_EQ(output.dims[2], 1);
+}
+
 TEST(FullyConneected, OuputCreatedWithCorrectDimentions)
 {
     cnncpp::fully_connected fc_layer(400, 120, cnncpp::activations::none,
         std::vector<float>(400 * 120, 1.0), std::vector<float>(120, 0.1));
-    auto output = fc_layer.output();
+    const auto &output = fc_layer.output();
     ASSERT_EQ(output.dims[0], 120);
     ASSERT_EQ(output.dims[1], 1);
     ASSERT_EQ(output.dims[2], 1);
 }
+
+
 
 TEST(FullyConneected, OuputComputeWithBias)
 {
@@ -21,11 +34,11 @@ TEST(FullyConneected, OuputComputeWithBias)
     cnncpp::fully_connected fc_layer(4, 3, cnncpp::activations::none, weights, { 0, 0.3, -0.5 });
     cnncpp::Tensor<float> input(4, 1, 1, { 1.0, 2.0, 3.0, 4.0f });
     auto output = fc_layer(input);
-    ASSERT_EQ(output.dims[0], 3);
-    ASSERT_EQ(output.dims[1], 1);
-    ASSERT_EQ(output.dims[2], 1);
+    ASSERT_EQ(output->dims[0], 3);
+    ASSERT_EQ(output->dims[1], 1);
+    ASSERT_EQ(output->dims[2], 1);
 
-    ASSERT_NEAR(8.48313684, output.data()[0], EPSILON);
-    ASSERT_NEAR(-2.38187395, output.data()[1], EPSILON);
-    ASSERT_NEAR(-1.31959815, output.data()[2], EPSILON);
+    ASSERT_NEAR(8.48313684,  output->data()[0], EPSILON);
+    ASSERT_NEAR(-2.38187395, output->data()[1], EPSILON);
+    ASSERT_NEAR(-1.31959815, output->data()[2], EPSILON);
 }

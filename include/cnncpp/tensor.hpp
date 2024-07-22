@@ -256,6 +256,10 @@ public:
     {
         return iterator2d();
     }
+    Tensor(const Tensor<T> &other) = delete;
+    const Tensor<T> &operator=(const Tensor<T> &other) = delete;
+    Tensor(Tensor<T> &&other) = delete;
+    const Tensor<T> &operator=(Tensor<T> &&other) = delete;
 };
 
 typedef Tensor<float> TensorF;
