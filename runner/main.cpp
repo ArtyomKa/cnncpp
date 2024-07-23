@@ -75,8 +75,8 @@ int main(int argc, const char* argv[])
     auto output6 = fc1(*output5);
     auto output7 = fc2(*output6);
     auto output8 = fc3(*output7);
-    auto res = softmax(std::vector<float>(&output8->data()[0], &output8->data()[0] + output8->total()));
-
+    //auto res = softmax(std::vector<float>(&output8->data()[0], &output8->data()[0] + output8->total()));
+    auto res = output8->data_vec(); 
     std::cout << "Digit: " << std::max_element(res.begin(), res.end()) - res.begin() << std::endl;
     return 0;
 }

@@ -45,10 +45,12 @@ const cnncpp::Tensor<float>* cnncpp::convolution::operator()(const Tensor<float>
             for (size_t f = 0; f < _filters; f++) {
                 auto& kernel = _kernels.at(f);
                 auto val = std::inner_product(kernel.begin(), kernel.end(), input.roi_iterator(row, col, _kernel_size), 0.0f);
-                auto after_activation = _activation(val + _bias[f]);
-                _output_tensor->set(row / _stride, col / _stride, f, after_activation);
+                // auto after_activation = _activation(val + _bias[f]);
+                val += _bias[f];
+                _output_tensor->set(row / _stride, col / _stride, f, val);
             }
         }
     }
+    _activation(_output_tensor->data_vec());
     return _output_tensor.get();
 }

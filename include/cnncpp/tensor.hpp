@@ -198,6 +198,14 @@ private:
     std::vector<T> _data;
 
 public:
+    std::vector<T> &data_vec()  
+    {
+        return _data;
+    }
+    const std::vector<T> &data_vec() const 
+    {
+        return _data;
+    }
     const std::array<std::size_t, 3> dims;
     constexpr Tensor(size_t rows, size_t cols, size_t depth)
         : dims { rows, cols, depth }

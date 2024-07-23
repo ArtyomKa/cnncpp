@@ -6,29 +6,39 @@
 #include <vector>
 namespace cnncpp::activations {
 
-typedef float (*activation_func_ptr)(float);
-
-constexpr float relu(float val)
+inline void softmax(std::vector<float>& input)
 {
-    return std::max(0.0f, val);
-}
-constexpr float tanh(float val)
-{
-    auto ex = exp(val);
-    auto eminx = exp(-val);
-    return (ex - eminx) / (ex + eminx);
-}
-constexpr float none(float val) { return val; }
+    float sum = 0.0;
+    std::transform(input.begin(), input.end(), input.begin(), [&sum](float v) { 
+            auto exp_v = exp(v);
+            sum += exp_v;
+            return exp_v; 
+        });
+    //auto sum = std::accumulate(input.begin(), input.end(), 0.0);
 
-inline std::vector<float> softmax(const std::vector<float>& input)
-{
-    std::vector<float> res(input.size());
-    std::transform(input.begin(), input.end(), res.begin(), [](float v) { return exp(v); });
-    auto sum = std::accumulate(res.begin(), res.end(), 0.0);
-
-    std::transform(res.begin(), res.end(), res.begin(), [sum](float v) { return v / sum; });
-    return res;
+    std::transform(input.begin(), input.end(), input.begin(), [sum](float v) { return v / sum; });
+    
 }
+
+inline void relu(std::vector<float>& data)
+{
+    std::transform(data.cbegin(), data.cend(), data.begin(), [](float val) {
+        return std::max(0.0f, val);
+    });
+}
+
+inline void tanh(std::vector<float>& data)
+{
+    std::transform(data.cbegin(), data.cend(), data.begin(), [](float val) {
+        auto ex = exp(val);
+        auto eminx = exp(-val);
+        return (ex - eminx) / (ex + eminx);
+    });
+}
+
+inline void none(std::vector<float>& data) {return;};
+
+using activation_func_ptr = void(*)(std::vector<float> &);
 }
 
 #endif

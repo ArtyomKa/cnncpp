@@ -27,9 +27,11 @@ const cnncpp::Tensor<float>* cnncpp::fully_connected::operator()(const Tensor<fl
     for (int i = 0; i < _output_tensor->dims[0]; i++) {
         std::vector<float> weights_row(_weights.begin() + i * input.dims[0], _weights.begin() + (i + 1) * input.dims[0]);
         float val = std::inner_product(weights_row.begin(), weights_row.end(), &input.data()[0], 0.0f);
-        val = _activation(val + _bias[i]);
+        // val = _activation(val + _bias[i]);
+        val += _bias[i];
         _output_tensor->set(i, 0, 0, val);
     }
+    _activation(_output_tensor->data_vec());
     return _output_tensor.get();
 }
 

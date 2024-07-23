@@ -15,7 +15,7 @@
 using json = nlohmann::json;
 
 static const std::unordered_map<std::string, cnncpp::activations::activation_func_ptr> _ACTICATIONS = { { "tanh", cnncpp::activations::tanh },
-    { "relu", cnncpp::activations::relu } , {"softmax", cnncpp::activations::none}};
+    { "relu", cnncpp::activations::relu } , {"softmax", cnncpp::activations::softmax}};
 
 auto conv_layer_factory = [i = 0](const json& net_json, const HighFive::File& hd5_file) mutable -> std::unique_ptr<cnncpp::layer> {
     const auto& net_config = net_json["config"];

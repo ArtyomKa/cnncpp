@@ -27,6 +27,6 @@ int main(int argc, const char* argv[])
     auto tensor = cnncpp::convert(float_mat);
     cnncpp::network net(model_config_file_name, model_file_name);
     auto &output = net(*tensor);
-    auto res = cnncpp::activations::softmax(std::vector<float>(&output.data()[0], &output.data()[0] + output.total()));
+    // auto res = cnncpp::activations::softmax(std::vector<float>(&output.data()[0], &output.data()[0] + output.total()));
     std::cout << "Done\n";
 }
