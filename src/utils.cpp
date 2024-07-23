@@ -9,7 +9,8 @@ std::unique_ptr<cnncpp::Tensor<float>> cnncpp::convert(cv::Mat image)
 {
     auto total = image.cols * image.rows * image.channels();
     std::vector<float> temp(total, 0);
-    std::transform(&image.data[0], &image.data[0] + total, temp.begin(), [](uchar val) { return float(val/255.0); });
+    std::copy(image.begin<float>(), image.end<float>(), temp.begin());
+    // std::transform(image.begin<float>(), image.end<float>(), temp.begin(), [](float val) { return val });
     return std::make_unique<Tensor<float>>(image.rows, image.cols, image.channels(), temp);
 }
 

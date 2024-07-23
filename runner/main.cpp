@@ -1,7 +1,10 @@
 #include "cnncpp/activations.hpp"
-#include "cnncpp/layers.hpp"
+#include "cnncpp/layers/convolution.hpp"
+#include "cnncpp/layers/layers.hpp"
+#include "cnncpp/layers/pooling.hpp"
 #include "cnncpp/utils.hpp"
-#include "highfive/H5File.hpp"
+#include <algorithm>
+#include <highfive/H5File.hpp>
 #include <highfive/highfive.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/core/hal/interface.h>
@@ -10,23 +13,22 @@
 
 int main(int argc, const char* argv[])
 {
-    auto image = cv::imread("/home/artyom/devel/sandbox/cnncpp/data/testSample/img_10.jpg", cv::IMREAD_GRAYSCALE);
+    if (argc != 3) {
+        std::cout << "Incorrect number of arguments.\nUsage: cnncpp_runner <model_path> <image_path>";
+        return -1;
+    }
+    std::string model_path(argv[1]);
+    std::string image_path(argv[2]);
+    auto image = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
+
     cv::resize(image, image, cv::Size(32, 32));
-    std::string model_file_name = "/home/artyom/devel/sandbox/cnncpp/data/model/test2.hd5";
     std::cout << "image dims " << image.cols << "x" << image.rows << "x" << image.channels() << "\n";
     cv::Mat float_mat;
-    image.convertTo(float_mat, CV_32F);
-    float_mat = (float_mat / 255.0);
-    auto tensor = cnncpp::convert(image);
-    //
-    auto image2 = cnncpp::convert(*tensor.get());
+    image.convertTo(float_mat, CV_32F, 1.0 / 255.0);
 
-    // cv::imshow("Image-orig", image);
-    // cv::imshow("Image-after", image2);
-    // cv::waitKey(0);
-    // cv::destroyAllWindows();
+    auto tensor = cnncpp::convert(float_mat);
 
-    HighFive::File file(model_file_name, HighFive::File::ReadOnly);
+    HighFive::File file(model_path, HighFive::File::ReadOnly);
 
     auto conv1_weights_data_set = file.getDataSet("/layers/conv2d_1/weights/kernels");
     auto conv1_bias_data_set = file.getDataSet("/layers/conv2d_1/weights/bias");
@@ -73,8 +75,8 @@ int main(int argc, const char* argv[])
     auto output6 = fc1(*output5);
     auto output7 = fc2(*output6);
     auto output8 = fc3(*output7);
-    auto res = softmax(std::vector<float>(&output8->data()[0], &output8->data()[0] + output8->total()));
-
-    std::cout << "done\n";
+    //auto res = softmax(std::vector<float>(&output8->data()[0], &output8->data()[0] + output8->total()));
+    auto res = output8->data_vec(); 
+    std::cout << "Digit: " << std::max_element(res.begin(), res.end()) - res.begin() << std::endl;
     return 0;
 }

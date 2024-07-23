@@ -1,7 +1,7 @@
-#include "cnncpp/layers.hpp"
+#include "cnncpp/layers/convolution.hpp"
 #include "gtest/gtest.h"
 #include <numeric>
-#include <vector>
+
 static constexpr float EPSILON = 1e-5;
 TEST(ConvolutionTest, VectorConvolution)
 {
@@ -14,19 +14,19 @@ TEST(ConvolutionTest, VectorConvolution)
 TEST(ConvolutionTest, OutputTensorIsCreatedWithCorrectDims2)
 {
     cnncpp::convolution conv({ 32, 32, 1 }, 5, 1, 6);
-    auto output_tensor = conv.output();
-    ASSERT_EQ(output_tensor->dims[0], 28);
-    ASSERT_EQ(output_tensor->dims[1], 28);
-    ASSERT_EQ(output_tensor->dims[2], 6);
+    auto &output_tensor = conv.output();
+    ASSERT_EQ(output_tensor.dims[0], 28);
+    ASSERT_EQ(output_tensor.dims[1], 28);
+    ASSERT_EQ(output_tensor.dims[2], 6);
 }
 
 TEST(ConvolutionTest, OutputTensorIsCreatedWithCorrectDims)
 {
     cnncpp::convolution conv({ 227, 227, 3 }, 11, 4, 96);
-    auto output_tensor = conv.output();
-    ASSERT_EQ(output_tensor->dims[0], 55);
-    ASSERT_EQ(output_tensor->dims[1], 55);
-    ASSERT_EQ(output_tensor->dims[2], 96);
+    auto &output_tensor = conv.output();
+    ASSERT_EQ(output_tensor.dims[0], 55);
+    ASSERT_EQ(output_tensor.dims[1], 55);
+    ASSERT_EQ(output_tensor.dims[2], 96);
 }
 
 TEST(ConvolutionTest, Simple2DConvolution)
@@ -61,10 +61,10 @@ TEST(ConvolutionTest, 4x42DConvolutionInputDepth3)
     std::iota(input_data.begin(), input_data.end(), 0);
     cnncpp::Tensor<float> input(4, 4, 3, input_data);
     cnncpp::convolution conv({ 4, 4, 3 }, 3, 1, 1, cnncpp::activations::none, { -1., 0., 1., -1., 0., 1., -1., 0., 1., -1., 0., 1., -1., 0., 1., -1., 0., 1., -1., 0., 1., -1., 0., 1., -1., 0., 1. }, std::vector<float>(1, 0.0));
-    auto res = conv(input);
-    ASSERT_EQ(res->dims[0], 2);
-    ASSERT_EQ(res->dims[1], 2);
-    ASSERT_EQ(res->dims[2], 1);
+    auto  res = conv(input);
+    ASSERT_EQ  (res->dims[0], 2);
+    ASSERT_EQ  (res->dims[1], 2);
+    ASSERT_EQ  (res->dims[2], 1);
     ASSERT_NEAR(res->data()[0], 18, EPSILON);
     ASSERT_NEAR(res->data()[1], 18, EPSILON);
     ASSERT_NEAR(res->data()[2], 18, EPSILON);
@@ -88,9 +88,9 @@ TEST(ConvolutionTest, 4x42DConvolutionInputDepth3Kernels2)
     std::vector<float> biases(2, 0.0); // biases length equals to the number of kernels
     cnncpp::convolution conv({ 4, 4, 3 }, 3, 1, 2, cnncpp::activations::none, weights, biases);
     auto res = conv(input);
-    ASSERT_EQ(res->dims[0], 2);
-    ASSERT_EQ(res->dims[1], 2);
-    ASSERT_EQ(res->dims[2], 2);
+    ASSERT_EQ(  res->dims[0], 2);
+    ASSERT_EQ(  res->dims[1], 2);
+    ASSERT_EQ(  res->dims[2], 2);
     ASSERT_NEAR(res->data()[0], 9 + 9 * 2 + 9 * 3, EPSILON);
     ASSERT_NEAR(res->data()[1], -9 - 9 * 2 - 9 * 3, EPSILON);
     ASSERT_NEAR(res->data()[2], 9 + 9 * 2 + 9 * 3, EPSILON);

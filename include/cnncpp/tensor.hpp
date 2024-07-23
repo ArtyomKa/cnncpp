@@ -198,6 +198,14 @@ private:
     std::vector<T> _data;
 
 public:
+    std::vector<T> &data_vec()  
+    {
+        return _data;
+    }
+    const std::vector<T> &data_vec() const 
+    {
+        return _data;
+    }
     const std::array<std::size_t, 3> dims;
     constexpr Tensor(size_t rows, size_t cols, size_t depth)
         : dims { rows, cols, depth }
@@ -256,6 +264,10 @@ public:
     {
         return iterator2d();
     }
+    Tensor(const Tensor<T> &other) = delete;
+    const Tensor<T> &operator=(const Tensor<T> &other) = delete;
+    Tensor(Tensor<T> &&other) = delete;
+    const Tensor<T> &operator=(Tensor<T> &&other) = delete;
 };
 
 typedef Tensor<float> TensorF;
