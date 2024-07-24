@@ -1,14 +1,9 @@
-#ifndef _CNN_CPP_TENSOR_HPP_
-#define _CNN_CPP_TENSOR_HPP_
-
-#include <algorithm>
-#include <array>
-#include <cassert>
+#include "gtest/gtest.h"
 #include <cstddef>
-#include <iostream>
 #include <iterator>
+#include <numeric>
+#include <ranges>
 #include <vector>
-namespace cnncpp {
 struct range {
     const size_t begin;
     const size_t end;
@@ -93,8 +88,7 @@ public:
 
         friend bool operator==(const iterator& a, const iterator& b)
         {
-            if (a._roi == nullptr && b._roi == nullptr)
-                return true; // end
+            if (a._roi == nullptr && b._roi == nullptr) return true; //end
             return (a._current == b._current) && (a._roi == b._roi);
         }
         friend bool operator!=(const iterator& a, const iterator& b) { return !(a == b); }
@@ -122,7 +116,7 @@ public:
         , _cols(cols)
         , _channels(channels)
     {
-        
+        // this->ptr += (_depth_range.begin + _channels * (_columns_range.begin + _cols * _rows_range.begin));
     }
     iterator begin()
     {
@@ -133,83 +127,50 @@ public:
         return iterator();
     }
 };
+class Ctr {
 
-// Main data storage class. The data stored in a vector in column major order.
-template <typename T>
-class Tensor {
-
-    std::vector<T> _data;
+    size_t _rows;
+    size_t _cols;
+    size_t _channels;
+    std::vector<float> _data;
 
 public:
-    std::vector<T>& data_vec()
+    Ctr(size_t rows, size_t cols, size_t channels)
+        : _rows(rows)
+        , _cols(cols)
+        , _channels(channels)
     {
-        return _data;
     }
-    const std::vector<T>& data_vec() const
+    Ctr(size_t rows, size_t cols, size_t channels, std::initializer_list<float> data)
+        : Ctr(rows, cols, channels)
     {
-        return _data;
+        _data = data;
     }
-    const std::array<std::size_t, 3> dims;
-    constexpr Tensor(size_t rows, size_t cols, size_t depth)
-        : dims { rows, cols, depth }
-        , _data(rows * cols * depth) {};
-    constexpr Tensor(size_t rows, size_t cols, size_t depth, const std::vector<T>& data)
-        : dims { rows, cols, depth }
-        , _data(data)
+    Ctr(size_t rows, size_t cols, size_t channels, std::vector<float>&& data)
+        : Ctr(rows, cols, channels)
     {
-        if (rows * cols * depth != _data.size()) {
-            throw std::length_error("input data is incompatible with supplied dimensions");
-        }
-    };
-
-    constexpr Tensor(size_t rows, size_t cols, size_t depth, std::vector<T>&& data)
-        : dims { rows, cols, depth }
-    {
-        if (rows * cols * depth != data.size()) {
-            throw std::length_error("input data is incompatible with supplied dimensions");
-        }
         _data = std::move(data);
-    };
-    const T* data() const
-    {
-        return _data.data();
-    }
-    void set(size_t row, size_t col, size_t depth, T val)
-    {
-        auto index = depth + col * dims[2] + row * dims[1] * dims[2];
-        assert(index < _data.size());
-        _data[index] = val;
-    }
-
-    void copyto(Tensor<T>& out) const
-    {
-        assert(_data.size() == out._data.size());
-        std::copy(_data.cbegin(), _data.cend(), out._data.begin());
-    }
-
-    int total() const
-    {
-        return dims[0] * dims[1] * dims[2];
     }
 
     roi<float> create_roi(const range& rrows, const range& rcols, const range& rdepth) const
     {
-        return roi<float>(_data.cbegin(), dims[0], dims[1], dims[2], rrows, rcols, rdepth);
+        return roi<float>(_data.cbegin(), _rows, _cols, _channels, rrows, rcols, rdepth);
     }
-
-    Tensor(const Tensor<T>& other) = delete;
-    const Tensor<T>& operator=(const Tensor<T>& other) = delete;
-    Tensor(Tensor<T>&& other) = delete;
-    const Tensor<T>& operator=(Tensor<T>&& other) = delete;
-
     friend class roi<float>;
     friend class roi<float>::iterator;
 };
-
-typedef Tensor<float> TensorF;
-
+auto begin(roi<float> const&);
+auto end(roi<float> const&);
 static_assert(std::input_iterator<roi<float>::iterator>);
 static_assert(std::ranges::input_range<roi<float>>);
 
-} // namespace
-#endif // _CNN_CPP_TENSOR_HPP_
+TEST(RangesTest, CreateROI3DIteration)
+{
+    std::vector<float> data(27);
+    std::iota(data.begin(), data.end(), 1); // creates a box 3x3x3 running indexes (1-based)
+    const Ctr t(3, 3, 3, std::move(data));
+    auto roi = t.create_roi({ 1, 3 }, { 1, 3 }, { 1, 3 });
+    std::vector<float> test { 14, 15, 17, 18, 23, 24, 26, 27 };
+    std::for_each(roi.begin(), roi.end(), [](auto val) {std::cout << val << "\n"; });
+    ASSERT_TRUE(std::ranges::equal(roi, test));
+}

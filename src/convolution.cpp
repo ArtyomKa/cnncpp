@@ -40,12 +40,13 @@ const cnncpp::Tensor<float>* cnncpp::convolution::operator()(const Tensor<float>
 {
     const size_t kernel_depth = input.dims[2];
     const size_t total_kernel_size = _kernel_size * _kernel_size * kernel_depth;
-    for (int row = 0; row < input.dims[0] - _kernel_size + 1; row += _stride) {
-        for (int col = 0; col < input.dims[1] - _kernel_size + 1; col += _stride) {
+    for (size_t row = 0; row < input.dims[0] - _kernel_size + 1; row += _stride) {
+        for (size_t col = 0; col < input.dims[1] - _kernel_size + 1; col += _stride) {
             for (size_t f = 0; f < _filters; f++) {
                 auto& kernel = _kernels.at(f);
-                auto val = std::inner_product(kernel.begin(), kernel.end(), input.roi_iterator(row, col, _kernel_size), 0.0f);
-                // auto after_activation = _activation(val + _bias[f]);
+                auto val = std::inner_product(kernel.begin(), kernel.end(), 
+                    input.create_roi(
+                        {row, row+_kernel_size}, {col, col+_kernel_size}, {0,kernel_depth}).begin(), 0.0f);
                 val += _bias[f];
                 _output_tensor->set(row / _stride, col / _stride, f, val);
             }

@@ -150,7 +150,6 @@ cnncpp::network::network(const std::string& json_config_file_path,
 const cnncpp::Tensor<float>& cnncpp::network::operator()(const Tensor<float>& input)
 {
     const Tensor<float>* prev = &input;
-
     // executes the layer's operator() on the output of the preveious layer.
     for (auto&& layer : _layers) {
         prev = (*layer)(*prev);

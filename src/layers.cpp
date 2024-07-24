@@ -15,9 +15,10 @@ cnncpp::fully_connected::fully_connected(size_t input_size, size_t output_size,
     , _activation(activation)
 {
     _output_tensor = std::make_unique<Tensor<float>>(output_size, 1, 1);
+    // the weights matrix is transposed so i can use inner_product in operator()
     for (int i = 0; i < output_size; i++) {
         for (int j = 0; j < input_size; j++) {
-            _weights[j + i*input_size] = weights[j*output_size + i];
+            _weights[j + i * input_size] = weights[j * output_size + i];
         }
     }
 }

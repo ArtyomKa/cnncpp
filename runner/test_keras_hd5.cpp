@@ -18,7 +18,9 @@ int main(int argc, const char* argv[])
     
     std::string image_path("/home/artyom/devel/sandbox/cnncpp/data/testSet/testSet/img_1.jpg");
     auto image = cv::imread(image_path, cv::IMREAD_GRAYSCALE);
-
+    cv::imshow("digit", image);
+    cv::waitKey();
+    cv::destroyAllWindows();
     cv::resize(image, image, cv::Size(32, 32));
     std::cout << "image dims " << image.cols << "x" << image.rows << "x" << image.channels() << "\n";
     cv::Mat float_mat;

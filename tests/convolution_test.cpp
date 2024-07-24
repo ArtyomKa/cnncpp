@@ -35,7 +35,7 @@ TEST(ConvolutionTest, Simple2DConvolution)
     cnncpp::Tensor<float> input(3, 3, 1, { 0.6, 1.0, 0.6, 1.0, 1.0, 1.0, 1.0, 0.9, 0.9 });
     std::vector<float> weights = { -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
     cnncpp::convolution conv({ 3, 3, 1 }, 3, 1, 1, cnncpp::activations::none, weights, std::vector<float> { .0 });
-    auto res2 = std::inner_product(kernel.begin(), kernel.end(), input.roi_iterator(0, 0, 3), 0.0);
+    auto res2 = std::inner_product(kernel.begin(), kernel.end(), input.create_roi({0,3}, {0,3}, {0,1}).begin(), 0.0);
     auto res = conv(input);
     ASSERT_EQ(res->dims[0], 1);
     ASSERT_EQ(res->dims[1], 1);
