@@ -8,6 +8,7 @@
 #include "cnncpp/layers/layers.hpp"
 namespace cnncpp {
 
+// Network class - Represents a Sequntial model - each layer's output is an input for the next one.
 class network {
     std::vector<std::unique_ptr<layer>> _layers;
 

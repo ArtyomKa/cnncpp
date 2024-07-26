@@ -1,7 +1,7 @@
 #include "cnncpp/network.hpp"
 #include "cnncpp/layers/convolution.hpp"
-#include "cnncpp/layers/pooling.hpp"
 #include "cnncpp/layers/layers.hpp"
+#include "cnncpp/layers/pooling.hpp"
 #include "cnncpp/tensor.hpp"
 #include "highfive/H5File.hpp"
 
@@ -14,8 +14,12 @@
 #include <string>
 using json = nlohmann::json;
 
+// map of conversions of activations from keras names to actual implementation
 static const std::unordered_map<std::string, cnncpp::activations::activation_func_ptr> _ACTICATIONS = { { "tanh", cnncpp::activations::tanh },
-    { "relu", cnncpp::activations::relu } , {"softmax", cnncpp::activations::softmax}};
+    { "relu", cnncpp::activations::relu }, { "softmax", cnncpp::activations::softmax } };
+
+// keras doesn't use layer name in the data path in the HD5 file. so the data is in "layers/<layer_type_#>".
+// Each layer type is numbered separately. So i use i as a lambda state to count the number of each layer typw where it's neeeded
 
 auto conv_layer_factory = [i = 0](const json& net_json, const HighFive::File& hd5_file) mutable -> std::unique_ptr<cnncpp::layer> {
     const auto& net_config = net_json["config"];
@@ -58,7 +62,6 @@ auto conv_layer_factory = [i = 0](const json& net_json, const HighFive::File& hd
     return std::unique_ptr<cnncpp::layer>(new cnncpp::convolution(input_shape_arr, kernel_size[0], strides[0], filters, _ACTICATIONS.at(activation), data, biases));
 };
 
-
 auto fully_connected_layer_factory = [i = 0](const json& net_json, const HighFive::File& hd5_file) mutable -> std::unique_ptr<cnncpp::layer> {
     const auto& net_config = net_json["config"];
     std::string net_name("dense");
@@ -66,13 +69,12 @@ auto fully_connected_layer_factory = [i = 0](const json& net_json, const HighFiv
         net_name += ("_" + std::to_string(i));
     }
     i++;
-    auto output_shape =  net_config["units"];
+    auto output_shape = net_config["units"];
     auto input_shape = net_json["build_config"]["input_shape"][1];
 
     std::cout << output_shape << "\n";
     std::cout << input_shape << "\n";
-    
-    
+
     std::string activation = net_config["activation"];
     // read weights
     auto v0 = hd5_file.getDataSet("layers/" + net_name + "/vars/0");
@@ -91,12 +93,10 @@ auto fully_connected_layer_factory = [i = 0](const json& net_json, const HighFiv
     std::vector<float> biases(total_size);
     v1.read(biases.data());
 
-    return std::unique_ptr<cnncpp::layer>(new cnncpp::fully_connected(input_shape, output_shape,  _ACTICATIONS.at(activation), data, biases));
+    return std::unique_ptr<cnncpp::layer>(new cnncpp::fully_connected(input_shape, output_shape, _ACTICATIONS.at(activation), data, biases));
 };
 
-
 auto avg_pool_layer_factory = [](const json& net_json, const HighFive::File& hd5_file) -> std::unique_ptr<cnncpp::layer> {
-
     const auto& net_config = net_json["config"];
     std::string net_name("avgpooling2d");
 
@@ -113,7 +113,6 @@ auto avg_pool_layer_factory = [](const json& net_json, const HighFive::File& hd5
 };
 
 auto flatten_layer_factory = [](const json& net_json, const HighFive::File& hd5_file) -> std::unique_ptr<cnncpp::layer> {
-
     const auto& net_config = net_json["config"];
     auto input_shape = net_json["build_config"]["input_shape"];
     std::array<int, 3> input_shape_arr;
@@ -122,7 +121,6 @@ auto flatten_layer_factory = [](const json& net_json, const HighFive::File& hd5_
     return std::unique_ptr<cnncpp::layer>(new cnncpp::flatten(input_shape_arr));
 };
 
-
 cnncpp::network::network(const std::string& json_config_file_path,
     const std::string& weights_hd5)
 {
@@ -130,6 +128,7 @@ cnncpp::network::network(const std::string& json_config_file_path,
     HighFive::File file(weights_hd5, HighFive::File::ReadOnly);
     for (auto& layer_config : model_config_json["config"]["layers"]) {
         std::cout << layer_config["class_name"] << " : " << layer_config["config"]["name"] << "\n";
+        // TODO - Consider creating a mapping from layer class name to a factory method.
         if (layer_config["class_name"] == "Conv2D") {
             _layers.push_back(conv_layer_factory(layer_config, file));
             continue;
@@ -150,9 +149,10 @@ cnncpp::network::network(const std::string& json_config_file_path,
 }
 const cnncpp::Tensor<float>& cnncpp::network::operator()(const Tensor<float>& input)
 {
-    const Tensor<float> *prev = &input;
-    
-    for (auto &&layer: _layers) {
+    const Tensor<float>* prev = &input;
+
+    // executes the layer's operator() on the output of the preveious layer.
+    for (auto&& layer : _layers) {
         prev = (*layer)(*prev);
     }
     return _layers.back()->output();

@@ -9,15 +9,13 @@ namespace cnncpp::activations {
 inline void softmax(std::vector<float>& input)
 {
     float sum = 0.0;
-    std::transform(input.begin(), input.end(), input.begin(), [&sum](float v) { 
-            auto exp_v = exp(v);
-            sum += exp_v;
-            return exp_v; 
-        });
-    //auto sum = std::accumulate(input.begin(), input.end(), 0.0);
+    std::transform(input.begin(), input.end(), input.begin(), [&sum](float v) {
+        auto exp_v = exp(v);
+        sum += exp_v;
+        return exp_v;
+    });
 
     std::transform(input.begin(), input.end(), input.begin(), [sum](float v) { return v / sum; });
-    
 }
 
 inline void relu(std::vector<float>& data)
@@ -36,9 +34,9 @@ inline void tanh(std::vector<float>& data)
     });
 }
 
-inline void none(std::vector<float>& data) {return;};
+inline void none(std::vector<float>& data) { return; };
 
-using activation_func_ptr = void(*)(std::vector<float> &);
+using activation_func_ptr = void (*)(std::vector<float>&);
 }
 
 #endif

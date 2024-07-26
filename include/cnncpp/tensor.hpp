@@ -5,15 +5,17 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
-#include <exception>
 #include <iostream>
 #include <iterator>
 #include <vector>
 namespace cnncpp {
+// Main data storage class. The data stored in a vector in column major order.
 template <typename T>
 class Tensor {
 
 public:
+    // iterator class for iterating over an ROI - added so the convolution on a specific ROI can be implemented as std::inner_product with the kernel data.
+    // used u=in the convolution layer
     class iterator {
     public:
         using value_type = T;
@@ -108,6 +110,8 @@ public:
         }
     };
 
+    // 2d iterator class - similar to the iterator above but iterates over 2d ROI on a specific depth of the tensor.
+    // Used in pooling layers (max and average pooling)
     class iterator2d {
     public:
         using value_type = T;
@@ -198,11 +202,11 @@ private:
     std::vector<T> _data;
 
 public:
-    std::vector<T> &data_vec()  
+    std::vector<T>& data_vec()
     {
         return _data;
     }
-    const std::vector<T> &data_vec() const 
+    const std::vector<T>& data_vec() const
     {
         return _data;
     }
@@ -264,10 +268,10 @@ public:
     {
         return iterator2d();
     }
-    Tensor(const Tensor<T> &other) = delete;
-    const Tensor<T> &operator=(const Tensor<T> &other) = delete;
-    Tensor(Tensor<T> &&other) = delete;
-    const Tensor<T> &operator=(Tensor<T> &&other) = delete;
+    Tensor(const Tensor<T>& other) = delete;
+    const Tensor<T>& operator=(const Tensor<T>& other) = delete;
+    Tensor(Tensor<T>&& other) = delete;
+    const Tensor<T>& operator=(Tensor<T>&& other) = delete;
 };
 
 typedef Tensor<float> TensorF;
